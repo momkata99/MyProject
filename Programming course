@@ -1,0 +1,108 @@
+Разполагаш със задача да помогнеш за планирането на следващия курс по Основи на Програмирането, като следиш графика на уроците и техните упражнения.
+На първия ред от входа ще получиш началния график на уроците и упражненията, разделени със запетая и интервал ", ". 
+Преди стартирането на курса ще получиш различни команди за промяна на графика, докато не се срещнеш с командата "course start". Възможните команди са:
+Add:{lessonTitle} - добавя урока в края на графика, ако не съществува
+Insert:{lessonTitle}:{index} - вмъква урока на дадения индекс, ако не съществува и индексът е валиден
+Remove:{lessonTitle} - премахва урока, ако съществува
+Swap:{lessonTitle}:{lessonTitle} - разменя местата на два урока, ако и двете заглавия съществуват
+Exercise:{lessonTitle} - добавя упражнение след урока, ако урокът съществува и няма вече упражнение, във формат "{lessonTitle}-Exercise". Ако урокът не съществува, добавя урока в края на графика, следван от упражнението.
+Всеки път, когато размениш или премахнеш урок, трябва също да направиш същото с упражненията, ако има такива, които следват след уроците.
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+
+public class CoursePlanner {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the initial list
+        List<String> list = new ArrayList<>(Arrays.asList(scanner.nextLine().split(", ")));
+
+        // Read commands
+        String command = scanner.nextLine();
+        while (!command.equals("course start")) {
+            String[] commandParts = command.split(":");
+            String action = commandParts[0];
+            String lessonTitle = commandParts[1];
+
+            switch (action) {
+                case "Add":
+                    if (!list.contains(lessonTitle)) {
+                        list.add(lessonTitle);
+                    }
+                    break;
+
+                case "Insert":
+                    int index = Integer.parseInt(commandParts[2]);
+                    if (!list.contains(lessonTitle) && index >= 0 && index < list.size()) {
+                        list.add(index, lessonTitle);
+                    }
+                    break;
+
+                case "Remove":
+                    list.remove(lessonTitle);
+                    list.remove(lessonTitle + "-Exercise");
+                    break;
+
+                case "Swap":
+                    String lessonTitle2 = commandParts[2];
+                    int index1 = list.indexOf(lessonTitle);
+                    int index2 = list.indexOf(lessonTitle2);
+
+                    if (index1 != -1 && index2 != -1) {
+                        list.set(index1, lessonTitle2);
+                        list.set(index2, lessonTitle);
+
+                        String exercise1 = lessonTitle + "-Exercise";
+                        String exercise2 = lessonTitle2 + "-Exercise";
+
+                        if (list.contains(exercise1)) {
+                            list.remove(exercise1);
+                            list.add(index2 + 1, exercise1);
+                        }
+
+                        if (list.contains(exercise2)) {
+                            list.remove(exercise2);
+                            list.add(index1 + 1, exercise2);
+                        }
+                    }
+                    break;
+
+                case "Exercise":
+                    int lessonIndex = list.indexOf(lessonTitle);
+                    String exercise = lessonTitle + "-Exercise";
+
+                    if (lessonIndex != -1) {
+                        if (!list.contains(exercise)) {
+                            list.add(lessonIndex + 1, exercise);
+                        }
+                    } else {
+                        list.add(lessonTitle);
+                        list.add(exercise);
+                    }
+                    break;
+            }
+
+            command = scanner.nextLine();
+        }
+
+        // Print the final list
+        for (int i = 0; i < list.size(); i++) {
+            System.out.printf("%d.%s%n", i + 1, list.get(i));
+        }
+    }
+}
+
+Входни данни:
+Data Types, Objects, Lists
+Add:Databases
+Insert:Arrays:0
+Remove:Lists
+course start
+Изходни данни:
+1.Arrays
+2.Data Types
+3.Objects
+4.Databases
