@@ -1,0 +1,101 @@
+Пиратите трябва безопасно да пренесат сандъка със съкровища обратно на кораба, като грабят по пътя.
+Създайте програма, която управлява състоянието на сандъка със съкровища по пътя. На първия ред ще получите началното съдържание на сандъка със съкровища, низ от предмети, разделени с "|".
+"{loot1}|{loot2}|{loot3} … {lootn}"
+
+Следващите редове представляват команди до "Yohoho!", което завършва търсенето на съкровища:
+
+"Loot {item1} {item2}…{itemn}":
+
+Взимате съкровища по пътя. Вмъкнете предметите в началото на сандъка.
+Ако предметът вече съществува, не го вмъквайте.
+"Drop {index}":
+
+Премахнете съкровището на дадената позиция и го добавете в края на сандъка със съкровища.
+Ако индексът е невалиден, пропуснете командата.
+"Steal {count}":
+
+Някой краде последните няколко съкровища. Ако броят на съкровищата е по-малък от дадения брой, премахнете толкова, колкото има.
+Отпечатайте откраднатите предмети, разделени с ", ":
+"{item1}, {item2}, {item3} … {itemn}"
+В края изведете средната стойност на съкровищата, което е сумата от дължините на всички предмети, разделена на броя на всички предмети в сандъка, форматирана до втория десетичен знак:
+"Average treasure gain: {averageGain} pirate credits."
+
+Ако сандъкът е празен, отпечатайте следното съобщение:
+"Failed treasure hunt."
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+
+public class TreasureHunt {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Reading initial loot items
+        List<String> treasureChest = new ArrayList<>(Arrays.asList(scanner.nextLine().split("\\|")));
+        String text = scanner.nextLine();
+        while (!text.equals("Yohoho!")) {
+
+
+            String[] commandParts = text.split(" ");
+            String command = commandParts[0];
+
+            switch (command) {
+                case "Loot":
+                    for (int i = 1; i < commandParts.length; i++) {
+                        if (!treasureChest.contains(commandParts[i])) {
+                            treasureChest.addFirst(commandParts[i]);
+                        }
+                    }
+                    break;
+
+                case "Drop":
+                    int index = Integer.parseInt(commandParts[1]);
+                    if (index >= 0 && index < treasureChest.size()) {
+                        String item = treasureChest.remove(index);
+                        treasureChest.add(item);
+                    }
+                    break;
+
+                case "Steal":
+                    int count = Integer.parseInt(commandParts[1]);
+                    if (count >= treasureChest.size()) {
+                        System.out.println(String.join(", ", treasureChest));
+                        treasureChest.clear();
+                    } else {
+                        List<String> stolenItems = new ArrayList<>();
+                        for (int i = 0; i < count; i++) {
+                            stolenItems.addFirst(treasureChest.removeLast());
+                        }
+                        System.out.println(String.join(", ", stolenItems));
+                    }
+                    break;
+            }
+            text = scanner.nextLine();
+        }
+
+        if (treasureChest.isEmpty()) {
+            System.out.println("Failed treasure hunt.");
+        } else {
+            double totalLength = treasureChest.stream().mapToInt(String::length).sum();
+            double averageGain = totalLength / treasureChest.size();
+            System.out.printf("Average treasure gain: %.2f pirate credits.%n", averageGain);
+        }
+
+    }
+}
+
+Вход:
+Gold|Silver|Bronze|Medallion|Cup
+Loot Wood Gold Coins
+Loot Silver Pistol
+Drop 3
+Steal 3
+Yohoho!
+Изход:
+Medallion, Cup, Gold
+Average treasure gain: 5.40 pirate credits
+
+
